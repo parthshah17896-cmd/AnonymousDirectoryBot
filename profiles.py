@@ -1,7 +1,7 @@
 profiles = [
 
     {
-        "id": 1
+        "id": 1,
         "name": "Riya",
         "age": 19,
         "status": "Unmarried",
@@ -12,7 +12,7 @@ profiles = [
     },
 
     {
-        "id": 2
+        "id": 2,
         "name": "Sofia",
         "age": 26,
         "status": "Unmarried",
@@ -23,7 +23,7 @@ profiles = [
     },
 
     {
-        "id": 3
+        "id": 3,
         "name": "Payal",
         "age": 25,
         "status": "Unmarried",
@@ -34,7 +34,7 @@ profiles = [
     },
 
     {
-        "id": 4
+        "id": 4,
         "name": "Preeti",
         "age": 32,
         "status": "Married",
