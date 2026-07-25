@@ -22,7 +22,7 @@ from database import (
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
-        telegram_id = update.effective_user.id
+    telegram_id = update.effective_user.id
 
     if user_exists(telegram_id):
 
