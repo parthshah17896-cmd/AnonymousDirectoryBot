@@ -6,6 +6,7 @@ from telegram import (
 from telegram.ext import (
     Application,
     CommandHandler,
+    CallbackQueryHandler,
     ContextTypes
 )
 
@@ -27,8 +28,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         keyboard = [
             [
                 InlineKeyboardButton(
-                    "💬 Chat Now",
-                    url=girl["bot"]
+                    f"💬 Select {girl['name']}",
+                    callback_data=f"select_{girl['id']}"
                 )
             ]
         ]
@@ -50,12 +51,24 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 reply_markup=InlineKeyboardMarkup(keyboard)
             )
 
+async def select_profile(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    query = update.callback_query
+    await query.answer()
+
+    data = query.data
+
+    print(data)
+
+    # Database check will go here later
+
 
 def main():
 
     app = Application.builder().token(BOT_TOKEN).build()
 
     app.add_handler(CommandHandler("start", start))
+    app.add_handler(CallbackQueryHandler(select_profile))
 
     print("Bot Started...")
 
