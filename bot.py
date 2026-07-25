@@ -12,6 +12,7 @@ from telegram.ext import (
 
 from config import BOT_TOKEN
 from profiles import profiles
+from database import init_db
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -65,6 +66,8 @@ async def select_profile(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 def main():
 
+    init_db()   # Creates users.db and the users table if they don't exist
+    
     app = Application.builder().token(BOT_TOKEN).build()
 
     app.add_handler(CommandHandler("start", start))
