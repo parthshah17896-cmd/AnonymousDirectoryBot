@@ -30,9 +30,11 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     telegram_id = update.effective_user.id
 
-    if user_exists(telegram_id):
-
-        selected_name, selected_bot = get_selection(telegram_id)
+    selection = get_selection(telegram_id)
+    
+    if selection:
+    
+        selected_name, selected_bot = selection
 
         keyboard = [
             [
