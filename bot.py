@@ -101,51 +101,49 @@ async def select_profile(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     telegram_id = query.from_user.id
 
-    # -------------------------
+    # =====================================================
     # ADMIN APPROVE
-    # -------------------------
-    
+    # =====================================================
+
     if query.data.startswith("approve_"):
-    
+
         if query.from_user.id != ADMIN_ID:
             return
-    
+
         user_id = int(query.data.split("_")[1])
-    
+
         reset_selection(user_id)
-        
         approve_request(user_id)
-    
+        delete_request(user_id)
+
         await context.bot.send_message(
             chat_id=user_id,
             text=(
                 "✅ Your reset request has been approved.\n\n"
-                "You can now use /start and select another profile."
+                "You may now use /start and choose another profile."
             )
         )
 
-        delete_request(user_id)
-    
         await query.edit_message_text(
-            "✅ Reset approved."
+            "✅ Reset Approved."
         )
-    
+
         return
-    
-    
-    # -------------------------
+
+    # =====================================================
     # ADMIN REJECT
-    # -------------------------
-    
+    # =====================================================
+
     if query.data.startswith("reject_"):
-    
+
         if query.from_user.id != ADMIN_ID:
             return
-    
+
         user_id = int(query.data.split("_")[1])
 
         reject_request(user_id)
-    
+        delete_request(user_id)
+
         await context.bot.send_message(
             chat_id=user_id,
             text=(
@@ -153,25 +151,85 @@ async def select_profile(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
         )
 
-        delete_request(user_id)
-    
         await query.edit_message_text(
-            "❌ Reset rejected."
+            "❌ Reset Rejected."
         )
-    
+
         return
-    
-    # Check if the user has already selected a profile
+
+    # =====================================================
+    # USER REQUEST RESET
+    # =====================================================
+
+    if query.data == "request_reset":
+
+        if has_pending_request(telegram_id):
+
+            await query.answer(
+                "You already have a pending request.",
+                show_alert=True
+            )
+
+            return
+
+        create_reset_request(telegram_id)
+
+        selected_name, selected_bot = get_selection(telegram_id)
+
+        admin_keyboard = [[
+            InlineKeyboardButton(
+                "✅ Approve",
+                callback_data=f"approve_{telegram_id}"
+            ),
+            InlineKeyboardButton(
+                "❌ Reject",
+                callback_data=f"reject_{telegram_id}"
+            )
+        ]]
+
+        await context.bot.send_message(
+            chat_id=ADMIN_ID,
+            text=(
+                "🔔 *Reset Request*\n\n"
+                f"👤 Name: {query.from_user.full_name}\n"
+                f"📛 Username: @{query.from_user.username or 'N/A'}\n"
+                f"🆔 Telegram ID: `{telegram_id}`\n"
+                f"❤️ Selected Girl: *{selected_name}*\n\n"
+                "Approve this request?"
+            ),
+            parse_mode="Markdown",
+            reply_markup=InlineKeyboardMarkup(admin_keyboard)
+        )
+
+        await query.answer(
+            "✅ Reset request sent.",
+            show_alert=True
+        )
+
+        return
+
+    # =====================================================
+    # USER ALREADY SELECTED
+    # =====================================================
+
     if user_exists(telegram_id):
 
         selected_name, selected_bot = get_selection(telegram_id)
 
-        keyboard = [[
-            InlineKeyboardButton(
-                "🚀 Continue Chat",
-                url=selected_bot
-            )
-        ]]
+        keyboard = [
+            [
+                InlineKeyboardButton(
+                    "🚀 Continue Chat",
+                    url=selected_bot
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    "🔄 Request Reset",
+                    callback_data="request_reset"
+                )
+            ]
+        ]
 
         await query.edit_message_caption(
             caption=(
@@ -184,57 +242,10 @@ async def select_profile(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         return
 
-    # -------------------------
-    # USER REQUEST RESET
-    # -------------------------
-    
-    if query.data == "request_reset":
-    
-        if has_pending_request(telegram_id):
-    
-            await query.answer(
-                "You already have a pending reset request.",
-                show_alert=True
-            )
-    
-            return
-    
-        create_reset_request(telegram_id)
-    
-        selected_name, selected_bot = get_selection(telegram_id)
-    
-        admin_keyboard = [[
-            InlineKeyboardButton(
-                "✅ Approve",
-                callback_data=f"approve_{telegram_id}"
-            ),
-            InlineKeyboardButton(
-                "❌ Reject",
-                callback_data=f"reject_{telegram_id}"
-            )
-        ]]
-    
-        await context.bot.send_message(
-            chat_id=ADMIN_ID,
-            text=(
-                "🔔 *Reset Request*\n\n"
-                f"👤 User: {query.from_user.full_name}\n"
-                f"📛 Username: @{query.from_user.username or 'N/A'}\n"
-                f"🆔 Telegram ID: `{telegram_id}`\n"
-                f"❤️ Selected: *{selected_name}*\n\n"
-                "Approve this request?"
-            ),
-            parse_mode="Markdown",
-            reply_markup=InlineKeyboardMarkup(admin_keyboard)
-        )
-    
-        await query.edit_message_text(
-            "✅ Your reset request has been sent to the administrator.\n\n"
-            "Please wait for approval."
-        )
-    
-        return
-    
+    # =====================================================
+    # FIRST TIME PROFILE SELECTION
+    # =====================================================
+
     profile_id = int(query.data.split("_")[1])
 
     girl = next(
@@ -273,7 +284,7 @@ async def select_profile(update: Update, context: ContextTypes.DEFAULT_TYPE):
         parse_mode="Markdown",
         reply_markup=InlineKeyboardMarkup(keyboard)
     )
-
+    
 def main():
 
     init_db()   # Creates users.db and the users table if they don't exist
