@@ -184,19 +184,22 @@ async def select_profile(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         return
 
-    # User clicked Request Reset
+    # -------------------------
+    # USER REQUEST RESET
+    # -------------------------
+    
     if query.data == "request_reset":
     
-    if has_pending_request(telegram_id):
-
-        await query.answer(
-            "You already have a pending reset request.",
-            show_alert=True
-        )
+        if has_pending_request(telegram_id):
     
-        return
+            await query.answer(
+                "You already have a pending reset request.",
+                show_alert=True
+            )
     
-    create_reset_request(telegram_id)
+            return
+    
+        create_reset_request(telegram_id)
     
         selected_name, selected_bot = get_selection(telegram_id)
     
@@ -224,8 +227,6 @@ async def select_profile(update: Update, context: ContextTypes.DEFAULT_TYPE):
             parse_mode="Markdown",
             reply_markup=InlineKeyboardMarkup(admin_keyboard)
         )
-    
-        await query.answer()
     
         await query.edit_message_text(
             "✅ Your reset request has been sent to the administrator.\n\n"
