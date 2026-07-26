@@ -17,7 +17,12 @@ from database import (
     user_exists,
     save_selection,
     get_selection,
-    reset_selection
+    reset_selection,
+    has_pending_request,
+    create_reset_request,
+    approve_request,
+    reject_request,
+    delete_request
 )
 
 
@@ -108,6 +113,8 @@ async def select_profile(update: Update, context: ContextTypes.DEFAULT_TYPE):
         user_id = int(query.data.split("_")[1])
     
         reset_selection(user_id)
+        
+        approve_request(user_id)
     
         await context.bot.send_message(
             chat_id=user_id,
@@ -116,6 +123,8 @@ async def select_profile(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 "You can now use /start and select another profile."
             )
         )
+
+        delete_request(user_id)
     
         await query.edit_message_text(
             "✅ Reset approved."
@@ -134,6 +143,8 @@ async def select_profile(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
     
         user_id = int(query.data.split("_")[1])
+
+        reject_request(user_id)
     
         await context.bot.send_message(
             chat_id=user_id,
@@ -141,6 +152,8 @@ async def select_profile(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 "❌ Your reset request has been rejected."
             )
         )
+
+        delete_request(user_id)
     
         await query.edit_message_text(
             "❌ Reset rejected."
@@ -173,6 +186,16 @@ async def select_profile(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # User clicked Request Reset
     if query.data == "request_reset":
+    if has_pending_request(telegram_id):
+
+        await query.answer(
+            "You already have a pending reset request.",
+            show_alert=True
+        )
+    
+        return
+    
+    create_reset_request(telegram_id)
     
         selected_name, selected_bot = get_selection(telegram_id)
     
