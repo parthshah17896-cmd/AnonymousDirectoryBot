@@ -64,6 +64,7 @@ def save_selection(telegram_id, selected_name, selected_bot):
 
 
 def get_selection(telegram_id):
+
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -77,6 +78,7 @@ def get_selection(telegram_id):
 
     conn.close()
 
+    return result
 
 def reset_selection(telegram_id):
     conn = get_connection()
@@ -180,5 +182,3 @@ def delete_request(telegram_id):
 
     conn.commit()
     conn.close()
-    
-    return result
