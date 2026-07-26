@@ -68,4 +68,17 @@ def get_selection(telegram_id):
 
     conn.close()
 
+
+def reset_selection(telegram_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "DELETE FROM users WHERE telegram_id=?",
+        (telegram_id,)
+    )
+
+    conn.commit()
+    conn.close()
+    
     return result
