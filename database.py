@@ -20,6 +20,15 @@ def init_db():
         )
     """)
 
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS reset_requests (
+            telegram_id INTEGER PRIMARY KEY,        
+            status TEXT NOT NULL,        
+            requested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        
+        )
+    """)
+
     conn.commit()
     conn.close()
 
@@ -75,6 +84,97 @@ def reset_selection(telegram_id):
 
     cursor.execute(
         "DELETE FROM users WHERE telegram_id=?",
+        (telegram_id,)
+    )
+
+    conn.commit()
+    conn.close()
+
+def has_pending_request(telegram_id):
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        SELECT status
+        FROM reset_requests
+        WHERE telegram_id=?
+        """,
+        (telegram_id,)
+    )
+
+    row = cursor.fetchone()
+
+    conn.close()
+
+    return row is not None and row[0] == "PENDING"
+
+def create_reset_request(telegram_id):
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        INSERT OR REPLACE INTO reset_requests
+        (telegram_id,status)
+
+        VALUES (?,?)
+        """,
+        (
+            telegram_id,
+            "PENDING"
+        )
+    )
+
+    conn.commit()
+    conn.close()
+
+def approve_request(telegram_id):
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        UPDATE reset_requests
+        SET status='APPROVED'
+        WHERE telegram_id=?
+        """,
+        (telegram_id,)
+    )
+
+    conn.commit()
+    conn.close()
+
+def reject_request(telegram_id):
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        UPDATE reset_requests
+        SET status='REJECTED'
+        WHERE telegram_id=?
+        """,
+        (telegram_id,)
+    )
+
+    conn.commit()
+    conn.close()
+
+def delete_request(telegram_id):
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        DELETE FROM reset_requests
+        WHERE telegram_id=?
+        """,
         (telegram_id,)
     )
 
