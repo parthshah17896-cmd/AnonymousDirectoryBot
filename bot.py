@@ -10,13 +10,14 @@ from telegram.ext import (
     ContextTypes
 )
 
-from config import BOT_TOKEN
+from config import BOT_TOKEN, ADMIN_ID
 from profiles import profiles
 from database import (
     init_db,
     user_exists,
     save_selection,
-    get_selection
+    get_selection,
+    reset_selection
 )
 
 
