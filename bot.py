@@ -186,6 +186,7 @@ async def select_profile(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # User clicked Request Reset
     if query.data == "request_reset":
+    
     if has_pending_request(telegram_id):
 
         await query.answer(
