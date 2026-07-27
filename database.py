@@ -30,10 +30,18 @@ def get_profiles():
     cur = conn.cursor()
 
     cur.execute("""
-        SELECT *
+        SELECT
+            id,
+            name,
+            age,
+            marital_status AS status,
+            country,
+            about,
+            image AS photo,
+            bot_link AS bot
         FROM profiles
         WHERE is_active = TRUE
-        ORDER BY id
+        ORDER BY id;
     """)
 
     profiles = cur.fetchall()
@@ -42,7 +50,6 @@ def get_profiles():
     conn.close()
 
     return profiles
-
 def save_selection(
     telegram_id,
     profile_id,
