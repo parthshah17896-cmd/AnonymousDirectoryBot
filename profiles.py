@@ -42,6 +42,17 @@ profiles = [
         "about": "Love books, family, travelling and meeting new people.",
         "photo": "images/preeti.jpg",
         "bot": "https://t.me/ChatWithPreetiBot"
-    }
+    },
 
+    {
+        "id": 5,
+        "name": "Thoibi",
+        "age": 20,
+        "status": "Unmarried",
+        "country": "India",
+        "about": "Hi! I'm Thoibi. I love reading novels, cycling & gardening.",
+        "photo": "images/thoibi.jpg",
+        "bot": "https://t.me/ChatWithThoibiBot"
+    }
+    
 ]
