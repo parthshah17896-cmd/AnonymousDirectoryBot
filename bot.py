@@ -68,6 +68,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         parse_mode="Markdown"
     )
 
+    profiles = get_profiles()
     for girl in profiles:
 
         keyboard = [
