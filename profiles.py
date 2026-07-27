@@ -51,7 +51,7 @@ profiles = [
         "status": "Unmarried",
         "country": "India",
         "about": "Hi! I'm Thoibi. I love reading novels, cycling & gardening.",
-        "photo": "images/thoibi.jpg",
+        "photo": "images/Thoibi.jpg",
         "bot": "https://t.me/ChatWithThoibiBot"
     }
     
