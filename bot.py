@@ -11,7 +11,7 @@ from telegram.ext import (
 )
 
 from config import BOT_TOKEN, ADMIN_ID
-from profiles import profiles
+from database import get_profiles
 from database import (
     init_db,
     user_exists,
