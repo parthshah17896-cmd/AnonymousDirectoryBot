@@ -266,10 +266,11 @@ async def select_profile(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     save_selection(
         telegram_id,
+        girl["id"],
         girl["name"],
         girl["bot"]
     )
-
+    
     keyboard = [[
         InlineKeyboardButton(
             "🚀 Open Chat",
