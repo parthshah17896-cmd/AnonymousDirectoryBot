@@ -10,31 +10,14 @@ def get_connection():
 
 
 def init_db():
-    conn = get_connection()
-    cur = conn.cursor()
 
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS users(
-        telegram_id BIGINT PRIMARY KEY,
-        selected_profile_id INTEGER NOT NULL,
-        selected_name TEXT NOT NULL,
-        selected_bot TEXT NOT NULL,
-        selected_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
-    """)
+    # users table
 
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS reset_requests(
-        telegram_id BIGINT PRIMARY KEY,
-        status VARCHAR(20) DEFAULT 'PENDING',
-        requested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
-    """)
+    # reset_requests table
 
-    conn.commit()
-    cur.close()
-    conn.close()
-    
+    # profiles table
+
+    conn.commit()    
 
 def save_selection(
     telegram_id,
