@@ -19,6 +19,30 @@ def init_db():
 
     conn.commit()    
 
+from psycopg2.extras import RealDictCursor
+
+def get_profiles():
+    conn = psycopg2.connect(
+        DATABASE_URL,
+        cursor_factory=RealDictCursor
+    )
+
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT *
+        FROM profiles
+        WHERE is_active = TRUE
+        ORDER BY id
+    """)
+
+    profiles = cur.fetchall()
+
+    cur.close()
+    conn.close()
+
+    return profiles
+
 def save_selection(
     telegram_id,
     profile_id,
