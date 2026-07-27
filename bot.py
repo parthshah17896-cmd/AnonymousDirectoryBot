@@ -177,7 +177,16 @@ async def select_profile(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         create_reset_request(telegram_id)
 
-        selected_name, selected_bot = get_selection(telegram_id)
+        selection = get_selection(telegram_id)
+
+        if selection is None:
+            await query.answer(
+                "No profile is currently linked to your account.",
+                show_alert=True
+            )
+            return
+        
+        selected_name, selected_bot = selection
 
         admin_keyboard = [[
             InlineKeyboardButton(
@@ -217,7 +226,16 @@ async def select_profile(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if user_exists(telegram_id):
 
-        selected_name, selected_bot = get_selection(telegram_id)
+        selection = get_selection(telegram_id)
+        
+        if selection is None:
+            await query.answer(
+                "No profile is currently linked to your account.",
+                show_alert=True
+            )
+            return
+        
+        selected_name, selected_bot = selection
 
         keyboard = [
             [
