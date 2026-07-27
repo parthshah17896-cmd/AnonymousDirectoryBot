@@ -150,24 +150,20 @@ def has_pending_request(telegram_id):
     return row is not None and row[0] == "PENDING"
 
 def create_reset_request(telegram_id):
-
     conn = get_connection()
-    cursor = conn.cursor()
+    cur = conn.cursor()
 
-    cursor.execute(
-        """
-        INSERT OR REPLACE INTO reset_requests
-        (telegram_id,status)
-
-        VALUES (%s,%s)
-        """,
-        (
-            telegram_id,
-            "PENDING"
-        )
-    )
+    cur.execute("""
+        INSERT INTO reset_requests (telegram_id, status)
+        VALUES (%s, 'PENDING')
+        ON CONFLICT (telegram_id)
+        DO UPDATE SET
+            status = 'PENDING',
+            requested_at = CURRENT_TIMESTAMP;
+    """, (telegram_id,))
 
     conn.commit()
+    cur.close()
     conn.close()
 
 def approve_request(telegram_id):
