@@ -251,6 +251,7 @@ async def select_profile(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     profile_id = int(query.data.split("_")[1])
 
+    profiles = get_profiles()
     girl = next(
         (g for g in profiles if g["id"] == profile_id),
         None
