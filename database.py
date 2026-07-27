@@ -121,6 +121,9 @@ def get_selection(telegram_id):
     cur.close()
     conn.close()
 
+    if row is None:
+        return None
+    
     return row
     
 
