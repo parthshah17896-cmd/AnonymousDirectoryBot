@@ -1,96 +1,133 @@
-import sqlite3
+import os
+import psycopg2
+from psycopg2.extras import RealDictCursor
 
-DB_NAME = "users.db"
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 
 def get_connection():
-    return sqlite3.connect(DB_NAME)
+    return psycopg2.connect(DATABASE_URL)
 
 
 def init_db():
     conn = get_connection()
-    cursor = conn.cursor()
+    cur = conn.cursor()
 
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS users (
-            telegram_id INTEGER PRIMARY KEY,
-            selected_bot TEXT NOT NULL,
-            selected_name TEXT NOT NULL,
-            selected_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS users(
+        telegram_id BIGINT PRIMARY KEY,
+        selected_profile_id INTEGER NOT NULL,
+        selected_name TEXT NOT NULL,
+        selected_bot TEXT NOT NULL,
+        selected_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
     """)
 
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS reset_requests (
-            telegram_id INTEGER PRIMARY KEY,        
-            status TEXT NOT NULL,        
-            requested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        
-        )
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS reset_requests(
+        telegram_id BIGINT PRIMARY KEY,
+        status VARCHAR(20) DEFAULT 'PENDING',
+        requested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
     """)
 
     conn.commit()
+    cur.close()
+    conn.close()
+    
+
+def save_selection(
+    telegram_id,
+    profile_id,
+    selected_name,
+    selected_bot
+):
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute(
+        """
+        INSERT INTO users(
+            telegram_id,
+            selected_profile_id,
+            selected_name,
+            selected_bot
+        )
+        VALUES(%s,%s,%s,%s)
+        """,
+        (
+            telegram_id,
+            profile_id,
+            selected_name,
+            selected_bot
+        )
+    )
+
+    conn.commit()
+    cur.close()
     conn.close()
 
 
 def user_exists(telegram_id):
-    conn = get_connection()
-    cursor = conn.cursor()
 
-    cursor.execute(
-        "SELECT 1 FROM users WHERE telegram_id = ?",
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute(
+        "SELECT 1 FROM users WHERE telegram_id=%s",
         (telegram_id,)
     )
 
-    result = cursor.fetchone()
+    exists = cur.fetchone() is not None
 
+    cur.close()
     conn.close()
 
-    return result is not None
-
-
-def save_selection(telegram_id, selected_name, selected_bot):
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    cursor.execute("""
-        INSERT INTO users
-        (telegram_id, selected_name, selected_bot)
-        VALUES (?, ?, ?)
-    """, (telegram_id, selected_name, selected_bot))
-
-    conn.commit()
-    conn.close()
-
+    return exists
+    
 
 def get_selection(telegram_id):
 
     conn = get_connection()
-    cursor = conn.cursor()
+    cur = conn.cursor()
 
-    cursor.execute("""
-        SELECT selected_name, selected_bot
+    cur.execute(
+        """
+        SELECT
+            selected_name,
+            selected_bot
         FROM users
-        WHERE telegram_id = ?
-    """, (telegram_id,))
+        WHERE telegram_id=%s
+        """,
+        (telegram_id,)
+    )
 
-    result = cursor.fetchone()
+    row = cur.fetchone()
 
+    cur.close()
     conn.close()
 
-    return result
+    return row
+    
 
 def reset_selection(telegram_id):
-    conn = get_connection()
-    cursor = conn.cursor()
 
-    cursor.execute(
-        "DELETE FROM users WHERE telegram_id=?",
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute(
+        """
+        DELETE FROM users
+        WHERE telegram_id=%s
+        """,
         (telegram_id,)
     )
 
     conn.commit()
+
+    cur.close()
     conn.close()
+    
 
 def has_pending_request(telegram_id):
 
@@ -101,7 +138,7 @@ def has_pending_request(telegram_id):
         """
         SELECT status
         FROM reset_requests
-        WHERE telegram_id=?
+        WHERE telegram_id=%s
         """,
         (telegram_id,)
     )
@@ -122,7 +159,7 @@ def create_reset_request(telegram_id):
         INSERT OR REPLACE INTO reset_requests
         (telegram_id,status)
 
-        VALUES (?,?)
+        VALUES (%s,%s)
         """,
         (
             telegram_id,
@@ -142,7 +179,7 @@ def approve_request(telegram_id):
         """
         UPDATE reset_requests
         SET status='APPROVED'
-        WHERE telegram_id=?
+        WHERE telegram_id=%s
         """,
         (telegram_id,)
     )
@@ -159,7 +196,7 @@ def reject_request(telegram_id):
         """
         UPDATE reset_requests
         SET status='REJECTED'
-        WHERE telegram_id=?
+        WHERE telegram_id=%s
         """,
         (telegram_id,)
     )
@@ -175,7 +212,7 @@ def delete_request(telegram_id):
     cursor.execute(
         """
         DELETE FROM reset_requests
-        WHERE telegram_id=?
+        WHERE telegram_id=%s
         """,
         (telegram_id,)
     )
